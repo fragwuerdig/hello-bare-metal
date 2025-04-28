@@ -7,7 +7,7 @@ A bare metal program that is able to:
 - display by pushing into the VGA buffer
 - accept key input via interrupt handling.
 
-... more to come. This is a hobby project to recall my times as embedded dev. Don't use it other than playing around. And certainly don't boot it on your actual machine :P
+... more to come. This is a hobby project to recall my times as embedded dev. Don't use it for any activities other than playing around. And certainly don't boot it on your actual machine :P
 
 ## Run it
 
@@ -15,4 +15,4 @@ To run it let's assume you got gcc (for x86) installed and also qemu to run this
 
 ```
 make run
-``
+```
