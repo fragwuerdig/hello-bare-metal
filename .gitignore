@@ -1,0 +1,6 @@
+boot.s
+iso
+isr.s
+build
+*.iso
+*.log
