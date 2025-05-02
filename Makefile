@@ -1,10 +1,21 @@
+
+CURDIR := $(shell pwd)
+
 # Compiler and Linker
 CC = gcc
 LD = ld
 ASM = gcc
-CFLAGS32 = -m32 -ffreestanding -nostdlib -O2 -Wall -Wextra
-CFLAGS64 = -m64 -ffreestanding -nostdlib -O2 -Wall -Wextra
+
+# Compiler Flags
+CFLAGS32 = -m32 -ffreestanding -nostdlib -O2 -Wall -Wextra -I$(CURDIR)/include
+CFLAGS64 = -m64 -ffreestanding -nostdlib -O2 -Wall -Wextra -I$(CURDIR)/include
 LDFLAGS = -nostdlib -T linker.ld
+export CFLAGS32 CFLAGS64 LDFLAGS
+
+# Subdirectories
+SUBDIRS = vga
+OBJSUFFIX = $(patsubst %, /%.o, $(SUBDIRS))
+OBJSUBDIRS = $(join $(SUBDIRS), $(OBJSUFFIX))
 
 # Source Files
 #KERNEL_SRC32 = idt.c
@@ -12,16 +23,21 @@ KERNEL_SRC64 = gdt64.c kernel.c paging.c idt.c irq.c ringbuffer.c keyboard.c
 ASM_SRC = boot.s isr.s
 
 # Object Files
-#KERNEL_OBJ32 = $(KERNEL_SRC32:%.c=build/%.o)
 KERNEL_OBJ64 = $(KERNEL_SRC64:%.c=build/%.o)
 ASM_OBJ = build/boot.o build/isr.o
 
 KERNEL_BIN = kernel.bin
 
+print-%:
+	@echo '$* = $($*)'
+
 # Default Target
 all: iso
 
 # Build rules
+
+$(OBJSUBDIRS):
+	$(MAKE) -C $(notdir $(basename $@))
 
 build/%.o: %.c
 	mkdir -p build
@@ -39,8 +55,8 @@ build/isr.o: isr.S
 	mkdir -p build
 	$(ASM) -m64 -ffreestanding -c isr.S -o build/isr.o
 
-$(KERNEL_BIN): $(ASM_OBJ) $(KERNEL_OBJ32) $(KERNEL_OBJ64)
-	$(LD) $(LDFLAGS) $(ASM_OBJ) $(KERNEL_OBJ32) $(KERNEL_OBJ64) -o build/$(KERNEL_BIN)
+$(KERNEL_BIN): $(ASM_OBJ) $(KERNEL_OBJ64) $(OBJSUBDIRS)
+	$(LD) $(LDFLAGS) $(ASM_OBJ) $(KERNEL_OBJ64) $(OBJSUBDIRS) -o build/$(KERNEL_BIN)
 
 # ISO Build
 iso: $(KERNEL_BIN)
@@ -52,6 +68,9 @@ iso: $(KERNEL_BIN)
 # Clean build artifacts
 clean:
 	rm -rf build iso mykernel.iso qemu.log boot.s isr.s
+	for dir in $(SUBDIRS); do \
+		$(MAKE) -C $$dir clean; \
+	done
 
 # Run in QEMU
 run: iso

@@ -1,5 +1,7 @@
 #include <stdint.h>
 #include "paging.h"
+#include <vga/vga.h>
+#include <vga/print.h>
 
 
 #define MULTIBOOT2_HEADER_MAGIC      0xe85250D6
@@ -69,14 +71,14 @@ uint64_t kernel_main64() {
     clear_screen();
     keyboard_init();
 
-    //asm volatile ("sti");
+    vga_buffer_t vga_buffer;
+    vga_init(&vga_buffer, (void *)VGA_ADDRESS, VGA_WIDTH, VGA_HEIGHT);
+    vga_print(&vga_buffer, "Hello World!\n", sizeof("Hello World!\n"));
 
-    volatile uint16_t * vga = (uint16_t *)VGA_ADDRESS;
     uint8_t c;
-
     while (1) {
         while (keyboard_getchar(&c)) {
-            vga[0] = c | (0xF0 << 8);
+            vga_put_char(&vga_buffer, c);
         }
         halt();
     }
