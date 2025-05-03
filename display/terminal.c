@@ -42,7 +42,7 @@ void vga_set_pos(vga_buffer_t *vga_buffer, uint16_t x, uint16_t y) {
 // puts a single char and advances the cursor
 void vga_put_char(vga_buffer_t *vga_buffer, char c) {
     
-    uint16_t *buffer = (uint16_t *)vga_buffer->buffer;
+    volatile uint16_t *buffer = (uint16_t *)vga_buffer->buffer;
 
     if (c == '\n') {
         if (vga_buffer->pos_y >= vga_buffer->height - 1) {

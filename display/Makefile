@@ -1,6 +1,6 @@
-SRC = terminal.c print.c
+SRC = terminal.c print.c format.c
 OBJ = $(SRC:.c=.o)
-OUT = vga.o
+OUT = display.o
 
 all: $(OUT)
 

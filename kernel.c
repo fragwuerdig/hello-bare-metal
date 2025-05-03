@@ -44,6 +44,13 @@ void halt() {
 }
 
 void crash_with_arg(uint64_t arg) {
+
+    asm volatile (
+        "mov %[input], %%rdi"
+        :
+        : [input] "r" (arg)
+        : "rdi"
+    );
     __asm__ volatile( "ud2" );
 }
 
@@ -73,7 +80,29 @@ uint64_t kernel_main64() {
 
     vga_buffer_t vga_buffer;
     vga_init(&vga_buffer, (void *)VGA_ADDRESS, VGA_WIDTH, VGA_HEIGHT);
-    vga_print(&vga_buffer, "Hello World!\n", sizeof("Hello World!\n"));
+
+    char buffer[256];
+    
+    vga_snprintf(buffer, sizeof(buffer), "Hello World!\n");
+    vga_print(&vga_buffer, buffer, sizeof(buffer));
+    
+    vga_snprintf(buffer, sizeof(buffer), "Integer Negative = %d\n", (int64_t)-34);
+    vga_print(&vga_buffer, buffer, sizeof(buffer));
+
+    vga_snprintf(buffer, sizeof(buffer), "Integer Positive = %d\n", (int64_t)340);
+    vga_print(&vga_buffer, buffer, sizeof(buffer));
+
+    vga_snprintf(buffer, sizeof(buffer), "Integer Hex = %x\n", (int64_t)-34);
+    vga_print(&vga_buffer, buffer, sizeof(buffer));
+
+    vga_snprintf(buffer, sizeof(buffer), "Integer Hex (Upper Case) = %X\n", (int64_t)340);
+    vga_print(&vga_buffer, buffer, sizeof(buffer));
+
+    vga_snprintf(buffer, sizeof(buffer), "Unsigned Integer Negative = %u\n", (uint64_t)-1);
+    vga_print(&vga_buffer, buffer, sizeof(buffer));
+
+    vga_snprintf(buffer, sizeof(buffer), "Unsigned Integer Positive = %u\n", (uint64_t)340);
+    vga_print(&vga_buffer, buffer, sizeof(buffer));
 
     uint8_t c;
     while (1) {

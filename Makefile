@@ -13,7 +13,7 @@ LDFLAGS = -nostdlib -T linker.ld
 export CFLAGS32 CFLAGS64 LDFLAGS
 
 # Subdirectories
-SUBDIRS = vga
+SUBDIRS = display
 OBJSUFFIX = $(patsubst %, /%.o, $(SUBDIRS))
 OBJSUBDIRS = $(join $(SUBDIRS), $(OBJSUFFIX))
 
