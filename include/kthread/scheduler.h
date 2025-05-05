@@ -15,5 +15,6 @@ void kthread_enqueue(kthread_t* t, uint8_t cpu_id);
 void kthread_scheduler_enqueue_tail(kthread_t* t, uint8_t cpu_id);
 void kthread_dequeue(kthread_t* t, uint8_t cpu_id);
 void kthread_scheduler(uint8_t cpu_id);
+void kthread_yield(void);
 
 #endif

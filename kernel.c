@@ -2,7 +2,10 @@
 #include "paging.h"
 #include <vga/vga.h>
 #include <vga/print.h>
+#include <vga/format.h>
 #include <kthread/kthread.h>
+#include <kthread/scheduler.h>
+#include <gdt64.h>
 
 
 #define MULTIBOOT2_HEADER_MAGIC      0xe85250D6
@@ -79,12 +82,11 @@ kthread_t thread2;
 
 void thread1_func() {
     
-    uint8_t id = kthread_get_cpu_id();
     char buffer[256];
 
     for (int i = 0; i < 10; i++) {
-        //vga_snprintf(buffer, sizeof(buffer), "Hello World #1 %d\n", i);
-        //vga_print(&vga_buffer, buffer, sizeof(buffer));
+        vga_snprintf(buffer, sizeof(buffer), "Hello World #1 %d\n", i);
+        vga_print(&vga_buffer, buffer, sizeof(buffer));
         kthread_yield();
     }
     
@@ -94,12 +96,11 @@ void thread1_func() {
 
 void thread2_func() {
 
-    uint8_t id = kthread_get_cpu_id();
     char buffer[256];
 
     for (int i = 0; i < 10; i++) {
-        //vga_snprintf(buffer, sizeof(buffer), "Hello World #2 %d\n", i);
-        //vga_print(&vga_buffer, buffer, sizeof(buffer));
+        vga_snprintf(buffer, sizeof(buffer), "Hello World #2 %d\n", i);
+        vga_print(&vga_buffer, buffer, sizeof(buffer));
         kthread_yield();
     }
 

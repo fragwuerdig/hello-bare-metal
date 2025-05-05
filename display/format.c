@@ -146,7 +146,7 @@ uint64_t vga_write_hex(uint64_t value, char * buffer, uint64_t size, uint8_t cap
         }    
     } while (value >= 1);
 
-    int num_digits = ptr-buffer;
+    uint64_t num_digits = ptr-buffer;
     for (uint64_t i = 0; i < num_digits; i++) {
         reverse[i] = buffer[num_digits - i - 1];
     }
@@ -188,7 +188,7 @@ uint64_t vga_write_dec(uint64_t value, char * buffer, uint64_t size) {
     } while (value >= 1);
 
     // correct the order
-    int num_digits = ptr - buffer;
+    uint64_t num_digits = ptr - buffer;
     for (uint64_t i = 0; i < num_digits; i++) {
         reverse[i] = buffer[num_digits - i - 1];
         
@@ -201,7 +201,7 @@ uint64_t vga_write_dec(uint64_t value, char * buffer, uint64_t size) {
 
 }
 
-uint64_t vga_format_print_uint(uint64_t value, vga_format_spec_t *spec, void * out, uint64_t out_size) {
+uint64_t vga_format_print_uint(uint64_t value, vga_format_spec_t *, void * out, uint64_t out_size) {
 
     if (out_size <= 0) {
         return 0; // no space to write
@@ -243,7 +243,7 @@ uint64_t vga_format_print_hex(uint64_t value, vga_format_spec_t *spec, void * ou
 
 }
 
-uint64_t vga_format_print_sint(int64_t value, vga_format_spec_t *spec, void * out, uint64_t out_size) {
+uint64_t vga_format_print_sint(int64_t value, vga_format_spec_t *, void * out, uint64_t out_size) {
 
     if (out_size <= 0) {
         return 0; // no space to write

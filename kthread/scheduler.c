@@ -117,7 +117,7 @@ void kthread_dequeue(kthread_t* t, uint8_t cpu_id) {
 
 static kthread_t* kthread_scheduler_pick(uint8_t cpu_id) {
     kthread_t* current = PER_CPU_QUEUES[cpu_id].current;
-    char buffer[256];
+    //char buffer[256];
     for (int prio = KTHREAD_PRIO_MAX; prio >= 0; prio--) {
         kthread_t* t = PER_CPU_QUEUES[cpu_id].queues[prio];
         while (t) {
@@ -151,7 +151,7 @@ void kthread_scheduler(uint8_t cpu_id) {
     kthread_t* next = 0;
     next = kthread_scheduler_pick(cpu_id);
 
-    char buffer[256];
+    //char buffer[256];
     //vga_snprintf(buffer, sizeof(buffer), "kthread_scheduler next thread %x\n", next);
     //vga_print(&vga_buffer, buffer, sizeof(buffer));
 
@@ -184,7 +184,7 @@ void kthread_scheduler(uint8_t cpu_id) {
 
 void kthread_yield(void) {
     
-    char buffer[256];
+    //char buffer[256];
 
     //vga_snprintf(buffer, sizeof(buffer), "in kthread_yield\n");
     //vga_print(&vga_buffer, buffer, sizeof(buffer));*/
