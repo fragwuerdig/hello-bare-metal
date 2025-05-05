@@ -2,6 +2,7 @@
 #include "paging.h"
 #include <vga/vga.h>
 #include <vga/print.h>
+#include <kthread/kthread.h>
 
 
 #define MULTIBOOT2_HEADER_MAGIC      0xe85250D6
@@ -71,44 +72,71 @@ void setup_early_stack(uint16_t num_stack_pages) {
     );
 }
 
+vga_buffer_t vga_buffer;
+
+kthread_t thread1;
+kthread_t thread2;
+
+void thread1_func() {
+    
+    uint8_t id = kthread_get_cpu_id();
+    char buffer[256];
+
+    for (int i = 0; i < 10; i++) {
+        //vga_snprintf(buffer, sizeof(buffer), "Hello World #1 %d\n", i);
+        //vga_print(&vga_buffer, buffer, sizeof(buffer));
+        kthread_yield();
+    }
+    
+    //halt();
+
+}
+
+void thread2_func() {
+
+    uint8_t id = kthread_get_cpu_id();
+    char buffer[256];
+
+    for (int i = 0; i < 10; i++) {
+        //vga_snprintf(buffer, sizeof(buffer), "Hello World #2 %d\n", i);
+        //vga_print(&vga_buffer, buffer, sizeof(buffer));
+        kthread_yield();
+    }
+
+    //halt();
+    
+}
+
+void idle_thread_func() {
+    while (1) {
+        halt();
+    }
+}
+
 uint64_t kernel_main64() {
 
     gdt64_install();
     setup_idt();
     clear_screen();
     keyboard_init();
+    kthread_init_cpu_queue(0);
 
-    vga_buffer_t vga_buffer;
     vga_init(&vga_buffer, (void *)VGA_ADDRESS, VGA_WIDTH, VGA_HEIGHT);
 
-    char buffer[256];
+    void * stack1 = early_alloc_stack(4);
+    void * stack2 = early_alloc_stack(4);
     
-    vga_snprintf(buffer, sizeof(buffer), "Hello World!\n");
-    vga_print(&vga_buffer, buffer, sizeof(buffer));
-    
-    vga_snprintf(buffer, sizeof(buffer), "Integer Negative = %d\n", (int64_t)-34);
-    vga_print(&vga_buffer, buffer, sizeof(buffer));
+    kthread_init(&thread1, "Thread 1", thread1_func, 3, stack1, 4*PAGE_SIZE);
+    kthread_init(&thread2, "Thread 2", thread2_func, 2, stack2, 4*PAGE_SIZE);
 
-    vga_snprintf(buffer, sizeof(buffer), "Integer Positive = %d\n", (int64_t)340);
-    vga_print(&vga_buffer, buffer, sizeof(buffer));
+    kthread_enqueue(&thread1, 0);
+    kthread_enqueue(&thread2, 0);
 
-    vga_snprintf(buffer, sizeof(buffer), "Integer Hex = %x\n", (int64_t)-34);
-    vga_print(&vga_buffer, buffer, sizeof(buffer));
+    kthread_enter(&thread2);
 
-    vga_snprintf(buffer, sizeof(buffer), "Integer Hex (Upper Case) = %X\n", (int64_t)340);
-    vga_print(&vga_buffer, buffer, sizeof(buffer));
-
-    vga_snprintf(buffer, sizeof(buffer), "Unsigned Integer Negative = %u\n", (uint64_t)-1);
-    vga_print(&vga_buffer, buffer, sizeof(buffer));
-
-    vga_snprintf(buffer, sizeof(buffer), "Unsigned Integer Positive = %u\n", (uint64_t)340);
-    vga_print(&vga_buffer, buffer, sizeof(buffer));
-
-    uint8_t c;
-    while (1) {
-        while (keyboard_getchar(&c)) {
-            vga_put_char(&vga_buffer, c);
-        }
+    while (1)
+    {
         halt();
     }
+    
 }

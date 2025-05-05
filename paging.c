@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include "paging.h"
+#include "klib/string.h"
 
 // early page table layout
 __attribute__((aligned(4096))) static volatile uint64_t pml4[1];
@@ -100,13 +101,4 @@ void * early_alloc_stack(uint16_t num_pages) {
     void * stack_start = (uint64_t)stack_stop + num_pages * PAGE_SIZE - 1;
     return stack_start;
 
-}
-
-void* memcpy(void* dest, const void* src, uint64_t n) {
-    unsigned char* d = (unsigned char*)dest;
-    const unsigned char* s = (const unsigned char*)src;
-    for (uint64_t i = 0; i < n; i++) {
-        d[i] = s[i];
-    }
-    return dest;
 }

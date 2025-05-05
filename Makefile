@@ -5,6 +5,7 @@ CURDIR := $(shell pwd)
 CC = gcc
 LD = ld
 ASM = gcc
+export CC LD ASM
 
 # Compiler Flags
 CFLAGS32 = -m32 -ffreestanding -nostdlib -O2 -Wall -Wextra -I$(CURDIR)/include
@@ -13,7 +14,7 @@ LDFLAGS = -nostdlib -T linker.ld
 export CFLAGS32 CFLAGS64 LDFLAGS
 
 # Subdirectories
-SUBDIRS = display
+SUBDIRS = display klib kthread
 OBJSUFFIX = $(patsubst %, /%.o, $(SUBDIRS))
 OBJSUBDIRS = $(join $(SUBDIRS), $(OBJSUFFIX))
 
