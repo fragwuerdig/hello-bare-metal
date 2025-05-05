@@ -4,3 +4,4 @@ isr.s
 build
 *.iso
 *.log
+*.o
