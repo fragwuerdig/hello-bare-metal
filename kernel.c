@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "paging.h"
+#include <mem/paging.h>
 #include <vga/vga.h>
 #include <vga/print.h>
 #include <vga/format.h>
@@ -58,23 +58,6 @@ void crash_with_arg(uint64_t arg) {
     __asm__ volatile( "ud2" );
 }
 
-void setup_early_stack(uint16_t num_stack_pages) {
-    
-    void* stack_base = early_alloc_continuous_pages(num_stack_pages);
-    if (stack_base == 0) {
-        // TODO: Handle allocation failure
-        return;
-    }
-
-    uint64_t new_rsp = (uint64_t)stack_base + num_stack_pages * PAGE_SIZE;
-    asm volatile (
-        "mov %0, %%rsp\n"
-        :
-        : "r" (new_rsp)
-        :
-    );
-}
-
 vga_buffer_t vga_buffer;
 
 kthread_t thread1;
@@ -114,17 +97,36 @@ void idle_thread_func() {
     }
 }
 
+void timer_handler() {
+    // This is a placeholder for the timer handler
+    // You can add your timer handling code here
+}
+
+
+void timer_init() {
+    lapic_timer_init(0x40);
+    install_irq_handler(32, (void*)timer_handler);
+}
+
 uint64_t kernel_main64() {
+
+    // setup direct mapping of physical memory to virtual memory
+    mem_setup_direct_map_phys_to_virt();
+
+    // relocate the kernel to the upper virtual address space
+    jump_hi();
 
     gdt64_install();
     setup_idt();
     clear_screen();
     keyboard_init();
-    kthread_init_cpu_queue(0);
+    /*kthread_init_cpu_queue(0);
 
     vga_init(&vga_buffer, (void *)VGA_ADDRESS, VGA_WIDTH, VGA_HEIGHT);
 
-    void * stack1 = early_alloc_stack(4);
+    timer_init();*/
+
+    /*void * stack1 = early_alloc_stack(4);
     void * stack2 = early_alloc_stack(4);
     
     kthread_init(&thread1, "Thread 1", thread1_func, 3, stack1, 4*PAGE_SIZE);
@@ -133,7 +135,7 @@ uint64_t kernel_main64() {
     kthread_enqueue(&thread1, 0);
     kthread_enqueue(&thread2, 0);
 
-    kthread_enter(&thread2);
+    kthread_enter(&thread2);*/
 
     while (1)
     {

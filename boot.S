@@ -1,4 +1,7 @@
+#include <mem/layout.h>
+
 .global _start
+.global jump_hi
 .code32
 
 _start:
@@ -35,6 +38,18 @@ _start:
 
 .code64
 
+.set KERNEL_BASE, 0xFFFF800000000000
+
+jump_hi:
+    leaq jump_hi1(%rip), %rax
+    movabs $KERNEL_BASE, %rcx
+    addq %rcx, %rax
+    jmp *%rax
+
+jump_hi1:
+    addq %rcx, (%rsp)
+    ret
+
 long_mode_entry:
     mov $0x10, %ax
     mov %ax, %ds
@@ -43,13 +58,13 @@ long_mode_entry:
     mov %ax, %fs
     mov %ax, %gs
 
-    # setup early setup_identity_paging
-    call setup_identity_paging
+    # setup early paging
+    call mem_setup_early_identity_mapping
 
     # allocate stack memory and setup stack
-    mov $4, %rdi
-    call early_alloc_stack
-    mov %rax, %rsp
+    # mov $4, %rdi
+    # call early_alloc_stack
+    # mov %rax, %rsp
 
     # main kernel entrypoint
     call kernel_main64

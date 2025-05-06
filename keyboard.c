@@ -1,7 +1,7 @@
 #include <stdint.h>
 
 #include "ringbuffer.h"
-#include "paging.h"
+#include <mem/paging.h>
 
 static bool keyboard_putchar(uint8_t data);
 
@@ -53,7 +53,7 @@ void keyboard_init() {
    
     keyboard_buffer_g.tail = 0;
    
-    keyboard_buffer_g.buffer = early_alloc_continuous_pages(1);
+    keyboard_buffer_g.buffer = mem_alloc_pages(1);
     if (keyboard_buffer_g.buffer == 0) {
         // TODO: Handle memory allocation failure
     }

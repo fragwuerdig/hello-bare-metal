@@ -6,5 +6,6 @@
 
 extern void irq0_handler(void);
 extern void irq1_handler(void);
+extern void irq32_handler(void);
 
 #endif

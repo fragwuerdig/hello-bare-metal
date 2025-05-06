@@ -1,7 +1,13 @@
 #include <stdint.h>
-#include "paging.h"
+#include <mem/paging.h>
 #include "irq.h"
 #include "isr.h"
+
+#define IA32_APIC_BASE_MSR 0x1B
+#define APIC_BASE 0xFEE00000
+#define IOAPIC_BASE 0xFEC00000
+#define IOREGSEL    *(volatile uint32_t*)(IOAPIC_BASE + 0x00)
+#define IOWIN       *(volatile uint32_t*)(IOAPIC_BASE + 0x10)
 
 typedef struct __attribute__((packed)) {
     uint16_t offset_low;
@@ -23,12 +29,8 @@ typedef struct {
     idt_descriptor_t descriptor; 
 } idt_struct_t;
 
-void idt_set_entry(idt_entry_t* idt, int vector, void* isr, uint16_t selector, uint8_t type_attr) {
-
-   
+void idt_set_entry(idt_entry_t* idt, int vector, void* isr, uint16_t selector, uint8_t type_attr) { 
     uint64_t isr_addr = (uint64_t)isr;
-
-    
     idt[vector].offset_low  = isr_addr & 0xFFFF;
     idt[vector].selector    = selector;
     idt[vector].ist         = 0; // no IST used for now
@@ -36,7 +38,6 @@ void idt_set_entry(idt_entry_t* idt, int vector, void* isr, uint16_t selector, u
     idt[vector].offset_mid  = (isr_addr >> 16) & 0xFFFF;
     idt[vector].offset_high = (isr_addr >> 32) & 0xFFFFFFFF;
     idt[vector].zero        = 0;
-
 }
 
 void empty_handler() {
@@ -45,11 +46,13 @@ void empty_handler() {
 }
 
 void setup_idt() {
-
+    
     init_irq_descriptor();
+    
     pic_remap();
+    //pic_disable();
 
-    volatile idt_struct_t * idt_struct = early_alloc_continuous_pages((sizeof(idt_struct_t) + PAGE_SIZE - 1) / PAGE_SIZE);
+    volatile idt_struct_t * idt_struct = mem_alloc_pages((sizeof(idt_struct_t) + PAGE_SIZE_4KiB - 1) / PAGE_SIZE_4KiB);
     if (idt_struct == 0) {
         // TODO: Handle error
         return;
@@ -57,6 +60,7 @@ void setup_idt() {
 
     idt_set_entry(idt_struct->entries, 0x20, irq0_handler, 0x08, 0x8E);
     idt_set_entry(idt_struct->entries, 0x21, irq1_handler, 0x08, 0x8E);
+    idt_set_entry(idt_struct->entries, 0x40, irq32_handler, 0x08, 0x8E);
     
     install_irq_handler(0, (void*)empty_handler);
 
@@ -67,6 +71,52 @@ void setup_idt() {
     __asm__ volatile ("sti");
 }
 
+void lapic_enable() {
+    uint64_t apic_base = rdmsr(IA32_APIC_BASE_MSR);
+    apic_base |= (1 << 11); // bit 11 = APIC global enable
+    wrmsr(IA32_APIC_BASE_MSR, apic_base);
+    volatile uint32_t* lapic_svr = (uint32_t*)(APIC_BASE + 0xF0);
+    *lapic_svr |= 0x100; // enable APIC via Spurious Interrupt Vector register
+}
+
+void lapic_timer_init(uint8_t vector) {
+    volatile uint32_t* divide = (uint32_t*)(APIC_BASE + 0x3E0);
+    volatile uint32_t* lvt_timer = (uint32_t*)(APIC_BASE + 0x320);
+    volatile uint32_t* init_count = (uint32_t*)(APIC_BASE + 0x380);
+
+    *divide = 0b1011;            // divide by 128
+    *lvt_timer = vector | (1 << 17); // vector + periodic mode
+    *init_count = 781250;       // initial count (experimentell)
+}
+
+uint32_t ioapic_read(uint8_t reg) {
+    IOREGSEL = reg;
+    return IOWIN;
+}
+
+void ioapic_write(uint8_t reg, uint32_t value) {
+    IOREGSEL = reg;
+    IOWIN = value;
+}
+
+void ioapic_set_entry(int irq, uint8_t vector, uint8_t apic_id) {
+    uint32_t low = vector; // z. B. 0x21
+    low |= (0 << 16); // delivery mode: fixed
+    low |= (0 << 11); // dest mode: physical
+    low |= (0 << 13); // polarity: high active
+    low |= (0 << 15); // trigger: edge
+    low |= (0 << 16); // mask: 0 = enabled
+
+    uint32_t high = apic_id << 24; // Destination APIC ID
+
+    ioapic_write(0x10 + 2 * irq, low);
+    ioapic_write(0x10 + 2 * irq + 1, high);
+}
+
+void pic_disable() {
+    outb(0x21, 0xFF);
+    outb(0xA1, 0xFF);
+}
 
 void pic_remap() {
     // PIC ports

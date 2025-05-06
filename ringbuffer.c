@@ -1,5 +1,5 @@
 #include "ringbuffer.h"
-#include "paging.h"
+#include <mem/paging.h>
 
 void ringbuffer_init(ringbuffer_t* rb, uint8_t* backing_buffer, uint32_t element_size, uint32_t element_count) {
     rb->buffer = backing_buffer;

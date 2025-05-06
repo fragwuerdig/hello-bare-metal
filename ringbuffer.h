@@ -6,8 +6,8 @@
 
 typedef struct {
     uint8_t* buffer;
-    uint32_t size;          // Anzahl Elemente
-    uint32_t element_size;  // Größe eines Elements
+    uint32_t size;
+    uint32_t element_size;
     uint32_t head;
     uint32_t tail;
 } ringbuffer_t;

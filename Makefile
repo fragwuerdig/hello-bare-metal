@@ -14,13 +14,13 @@ LDFLAGS = -nostdlib -T linker.ld
 export CFLAGS32 CFLAGS64 LDFLAGS
 
 # Subdirectories
-SUBDIRS = display klib kthread
+SUBDIRS = display klib kthread mem
 OBJSUFFIX = $(patsubst %, /%.o, $(SUBDIRS))
 OBJSUBDIRS = $(join $(SUBDIRS), $(OBJSUFFIX))
 
 # Source Files
 #KERNEL_SRC32 = idt.c
-KERNEL_SRC64 = gdt64.c kernel.c paging.c idt.c irq.c ringbuffer.c keyboard.c
+KERNEL_SRC64 = gdt64.c kernel.c idt.c irq.c ringbuffer.c keyboard.c
 ASM_SRC = boot.s isr.s
 
 # Object Files
@@ -50,7 +50,7 @@ build/kernel.o: kernel.c
 
 build/boot.o: boot.S
 	mkdir -p build
-	$(ASM) -m64 -ffreestanding -c boot.S -o build/boot.o
+	$(ASM) -m64 -ffreestanding -Iinclude -c boot.S -o build/boot.o
 
 build/isr.o: isr.S
 	mkdir -p build

@@ -1,6 +1,6 @@
 #include<stdint.h>
 #include "irq.h"
-#include "paging.h"
+#include <mem/paging.h>
 
 static volatile irq_descriptor_t * g_irq_descriptor;
 
@@ -16,7 +16,7 @@ void irq_dispatcher(uint64_t irq_number) {
 
 void init_irq_descriptor() {
 
-    g_irq_descriptor = (irq_descriptor_t *)early_alloc_continuous_pages(NUM_PAGES_FOR_TYPE(irq_descriptor_t));
+    g_irq_descriptor = (irq_descriptor_t *)mem_alloc_pages(NUM_PAGES_FOR_TYPE(irq_descriptor_t));
 
     if (g_irq_descriptor == 0) {
         // TODO: Handle allocation failure
