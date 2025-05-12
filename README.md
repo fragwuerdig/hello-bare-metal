@@ -3,10 +3,12 @@
 A bare metal program featuring:
 
 - boot into x86-64bit mode with paging enabled
-- minimal bump allocator with identity mapping
-- interrupts (to be extended/configured properly)
-- cooperative multitasking
+- kernel high-half relocation
+- kernel heap (currently only bump allocated)
+- interrupts enabled
+- timer based preemptive multitasking
 - basic formatted vga output
+- some common kernel clib functions
 
 ... more to come. This is a hobby project to recall my times as embedded dev. Don't use it for any activities other than playing around. And certainly don't boot it on your actual machine :P
 
@@ -18,4 +20,18 @@ To run it let's assume you got gcc (for x86_64) installed and also qemu to run t
 
 ```
 make run
+```
+
+## Debug it
+
+```
+make run-debug
+gdb build/kernel.bin
+```
+
+Inside the debugger:
+
+```
+target remote localhost:1234
+continue
 ```
