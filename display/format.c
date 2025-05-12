@@ -275,7 +275,7 @@ uint64_t vga_format_print_sint(int64_t value, vga_format_spec_t *, void * out, u
 
 }
 
-uint64_t vga_snprintf(char * out, uint64_t size, char *format, ...) {
+uint64_t vga_snprintf(char * out, uint64_t size, const char *format, ...) {
     va_list args;
     va_start(args, format);
     int advance = 0;
@@ -319,7 +319,7 @@ uint64_t vga_snprintf(char * out, uint64_t size, char *format, ...) {
                 digits = vga_format_print_hex(value_hex, &spec, ptr, siz_track);
                 break;
             default:
-                ptr = *format;
+                *ptr = *format;
                 ptr++;
                 siz_track--;
                 continue;

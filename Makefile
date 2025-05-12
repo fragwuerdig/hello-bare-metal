@@ -8,8 +8,9 @@ ASM = gcc
 export CC LD ASM
 
 # Compiler Flags
-CFLAGS32 = -m32 -ffreestanding -nostdlib -O2 -Wall -Wextra -I$(CURDIR)/include
-CFLAGS64 = -m64 -ffreestanding -nostdlib -O2 -Wall -Wextra -I$(CURDIR)/include
+CFLAGS32 = -m32 -ffreestanding -nostdlib -O2 -Wall -Wextra -I$(CURDIR)/include -mno-sse -mno-sse2 -mno-mmx -mno-3dnow -mno-avx -mno-avx2
+CFLAGS64 = -m64 -ffreestanding -nostdlib -O2 -Wall -Wextra -I$(CURDIR)/include -mno-sse -mno-sse2 -mno-mmx -mno-3dnow -mno-avx -mno-avx2
+
 LDFLAGS = -nostdlib -T linker.ld
 export CFLAGS32 CFLAGS64 LDFLAGS
 
@@ -76,4 +77,7 @@ clean:
 # Run in QEMU
 run: iso
 	qemu-system-x86_64 -cdrom mykernel.iso -no-reboot -no-shutdown -serial mon:stdio -d int,cpu_reset -D qemu.log
+
+run-debug: iso
+	qemu-system-x86_64 -cdrom mykernel.iso -no-reboot -no-shutdown -serial mon:stdio -d int,cpu_reset -D qemu.log -s -S
 

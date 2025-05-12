@@ -21,7 +21,7 @@ __attribute__((aligned(4096))) static volatile uint64_t g_phys_to_virt_pdpt[512]
 #define PAGE_MASK_4KiB (0xFFFFFFFFFFFFF000)
 
 static uint64_t next_free_phys = 0x200000;
-static uint64_t next_free_heap = MEM_START_KERNEL_HEAP;
+uint64_t next_free_heap = MEM_START_KERNEL_HEAP;
 
 // this  function sets up the identity mapping of the
 // physical memory into the designated virtual kernel space
@@ -139,6 +139,8 @@ void * mem_alloc_pages(uint64_t num_pages) {
         mem_map_page(page_frame_addr, virt + i * PAGE_SIZE_4KiB);
     }
 
+    return virt;
+
 }
 
 // allocate and map stack pages. the difference
@@ -147,7 +149,7 @@ void * mem_alloc_pages(uint64_t num_pages) {
 void * mem_alloc_stack_pages(uint16_t num_pages) {
     
     void * stack_stop = (uint64_t)mem_alloc_pages(num_pages);
-    void * stack_start = (uint64_t)stack_stop + num_pages * PAGE_SIZE_4KiB - 1;
+    void * stack_start = (uint64_t)stack_stop + num_pages * PAGE_SIZE_4KiB - 32;
     return stack_start;
 
 }

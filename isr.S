@@ -1,11 +1,13 @@
 .global isr_common_stub
 .global irq_handler_table
 .global load_idt
+.global eoi
 
 .macro IRQ_HANDLER num
 .global irq\num\()_handler
 irq\num\()_handler:
-    mov $\num, %rdi
+    cli
+    push $\num
     jmp irq_common_entry 
 .endm
 
@@ -25,7 +27,8 @@ irq_common_entry:
     push %r13
     push %r14
     push %r15
-
+    
+    movq 120(%rsp),  %rdi
     call irq_dispatcher
 
     pop %r15
@@ -43,11 +46,14 @@ irq_common_entry:
     pop %rdx
     pop %rcx
     pop %rax
+    
+    // clean up stack value
+    // pushed by entry-point
+    add $8, %rsp
 
-    // EOI
+eoi:
     movb $0x20, %al
     outb %al, $0x20
-    
     iretq
 
 load_idt:

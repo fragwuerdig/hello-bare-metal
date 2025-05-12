@@ -3,6 +3,7 @@
 .global _start
 .global jump_hi
 .code32
+.global gdt64_flush
 
 _start:
     cli
@@ -31,10 +32,9 @@ _start:
 
     # Now far jump into 64-bit long mode
     ljmp $0x08, $long_mode_entry
-    
+
 .hang32:
     jmp .hang32
-
 
 .code64
 
@@ -72,6 +72,23 @@ long_mode_entry:
 .hang:
     hlt
     jmp .hang
+
+gdt64_flush:
+    mov $0x10, %ax
+    mov %ax, %ds
+    mov %ax, %es
+    mov %ax, %fs
+    mov %ax, %gs
+    mov %ax, %ss
+
+    # Far jump to reload CS with 0x08 and return after
+    pushq $0x08
+    lea flush_cont(%rip), %rax
+    pushq %rax
+    lretq
+
+flush_cont:
+    ret
 
 .align 4096
 pml4_table:

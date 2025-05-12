@@ -15,6 +15,9 @@ static void clear_last_row(vga_buffer_t *vga_buffer) {
 
 static void shift_up(vga_buffer_t *vga_buffer) {
     uint16_t * buffer = vga_buffer->buffer;
+    if (buffer == 0) {
+        return;
+    }
     for (uint16_t row = 1; row < vga_buffer->height; row++) {
         for (uint16_t col = 0; col < vga_buffer->width; col++) {
             buffer[(row - 1) * vga_buffer->width + col] = buffer[row * vga_buffer->width + col];
@@ -23,7 +26,7 @@ static void shift_up(vga_buffer_t *vga_buffer) {
 }
 
 // init the vga_buffer_t
-void vga_init(vga_buffer_t *vga_buffer, void * buf, uint16_t width, uint16_t height) {
+void vga_init(vga_buffer_t *vga_buffer, uint16_t * buf, uint16_t width, uint16_t height) {
     vga_buffer->buffer = buf;
     vga_buffer->pos_x = 0;
     vga_buffer->pos_y = 0;

@@ -1,13 +1,11 @@
 #include <stdint.h>
 #include <mem/paging.h>
+#include <mem/layout.h>
 #include "irq.h"
 #include "isr.h"
 
 #define IA32_APIC_BASE_MSR 0x1B
-#define APIC_BASE 0xFEE00000
-#define IOAPIC_BASE 0xFEC00000
-#define IOREGSEL    *(volatile uint32_t*)(IOAPIC_BASE + 0x00)
-#define IOWIN       *(volatile uint32_t*)(IOAPIC_BASE + 0x10)
+
 
 typedef struct __attribute__((packed)) {
     uint16_t offset_low;
@@ -86,7 +84,7 @@ void lapic_timer_init(uint8_t vector) {
 
     *divide = 0b1011;            // divide by 128
     *lvt_timer = vector | (1 << 17); // vector + periodic mode
-    *init_count = 781250;       // initial count (experimentell)
+    *init_count = 781250000;       // initial count (experimentell)
 }
 
 uint32_t ioapic_read(uint8_t reg) {

@@ -61,24 +61,23 @@ typedef struct kthread {
     void* stack_base;
     uint64_t stack_size;
 
-    // for later?
-    // struct process* parent;
-
-    // for later?
-    // uint64_t page_table;;
-
     struct kthread* next;
     uint8_t __padding0;
     struct kthread* prev;
     uint8_t __padding1;
+
+    // TODO: for later?
+    // struct process* parent;
+
+    // TODO: for later?
+    // uint64_t page_table;;
 } kthread_t;
 
 void kthread_init(
     kthread_t* t, const char * name,
     void (*entry)(void),
     uint8_t priority,
-    void * stack_base,
-    uint64_t stack_size
+    void * stack_base
 );
 void kthread_init_cpu_queue(uint8_t cpu_id);
 uint8_t kthread_get_cpu_id();
