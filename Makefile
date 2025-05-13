@@ -15,18 +15,18 @@ LDFLAGS = -nostdlib -T linker.ld
 export CFLAGS32 CFLAGS64 LDFLAGS
 
 # Subdirectories
-SUBDIRS = display klib kthread mem
+SUBDIRS = display klib kthread mem boot
 OBJSUFFIX = $(patsubst %, /%.o, $(SUBDIRS))
 OBJSUBDIRS = $(join $(SUBDIRS), $(OBJSUFFIX))
 
 # Source Files
 #KERNEL_SRC32 = idt.c
 KERNEL_SRC64 = gdt64.c kernel.c idt.c irq.c ringbuffer.c keyboard.c
-ASM_SRC = boot.s isr.s
+ASM_SRC = isr.s
 
 # Object Files
 KERNEL_OBJ64 = $(KERNEL_SRC64:%.c=build/%.o)
-ASM_OBJ = build/boot.o build/isr.o
+ASM_OBJ = build/isr.o
 
 KERNEL_BIN = kernel.bin
 
@@ -49,10 +49,6 @@ build/kernel.o: kernel.c
 	mkdir -p build
 	$(CC) $(CFLAGS64) -c $< -o $@
 
-build/boot.o: boot.S
-	mkdir -p build
-	$(ASM) -m64 -ffreestanding -Iinclude -c boot.S -o build/boot.o
-
 build/isr.o: isr.S
 	mkdir -p build
 	$(ASM) -m64 -ffreestanding -c isr.S -o build/isr.o
@@ -69,7 +65,7 @@ iso: $(KERNEL_BIN)
 
 # Clean build artifacts
 clean:
-	rm -rf build iso mykernel.iso qemu.log boot.s isr.s
+	rm -rf build iso mykernel.iso qemu.log isr.s
 	for dir in $(SUBDIRS); do \
 		$(MAKE) -C $$dir clean; \
 	done

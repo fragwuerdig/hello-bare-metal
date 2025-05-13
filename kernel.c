@@ -8,22 +8,9 @@
 #include <gdt64.h>
 #include <mem/layout.h>
 
-
-#define MULTIBOOT2_HEADER_MAGIC      0xe85250D6
-#define MULTIBOOT2_HEADER_ARCH       0
-#define MULTIBOOT2_HEADER_LENGTH     16
-
 #define VGA_ADDRESS                 ( MEM_START_DIRECT_PHYS_TO_VIRT + 0xB8000ULL )
 #define VGA_WIDTH 80
 #define VGA_HEIGHT 25
-
-__attribute__((section(".multiboot2"), aligned(8)))
-const uint32_t multiboot2_header[] = {
-    MULTIBOOT2_HEADER_MAGIC,
-    MULTIBOOT2_HEADER_ARCH,
-    MULTIBOOT2_HEADER_LENGTH,
-    -(MULTIBOOT2_HEADER_MAGIC + MULTIBOOT2_HEADER_ARCH + MULTIBOOT2_HEADER_LENGTH),
-};
 
 void outb(uint16_t port, uint8_t val) {
     __asm__ volatile ( "outb %0, %1" : : "a"(val), "Nd"(port) );
